@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".InfinityBarSettingsActivity">
+
+    <TextView
+        android:id="@+id/hiddenAppsActivityTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="16dp"
+        android:paddingTop="16dp"
+        android:text="Infinity bar"
+        android:textColor="?attr/colorPrimary"
+        android:textSize="34sp" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:layout_marginTop="4dp"
+        android:background="?attr/colorPrimary" />
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="16dp"
+        android:paddingTop="16dp"
+        android:paddingBottom="16dp"
+        android:text="La tua giornata"
+        android:textAlignment="textStart"
+        android:textColor="?attr/colorPrimary"
+        android:textSize="24sp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp">
+
+        <TextView
+            android:id="@+id/start_day_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:ellipsize="none"
+            android:onClick="setStartOfDay"
+            android:singleLine="true"
+            android:text="00:00"
+            android:textAlignment="center"
+            android:textColor="?attr/colorPrimary"
+            android:textSize="34sp" />
+
+        <TextView
+            android:id="@+id/end_day_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:ellipsize="none"
+            android:onClick="setEndOfDay"
+            android:singleLine="true"
+            android:text="23:59"
+            android:textAlignment="center"
+            android:textColor="?attr/colorPrimary"
+            android:textSize="34sp" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp">
+
+        <TextView
+            android:id="@+id/textView4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="inizia alle:"
+            android:textAlignment="center"
+            android:textColor="?attr/colorPrimary"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/textView3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="finisce alle:"
+            android:textAlignment="center"
+            android:textColor="?attr/colorPrimary"
+            android:textSize="14sp" />
+
+    </LinearLayout>
+
+
+</LinearLayout>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".HiddenAppsActivity">
+
+    <TextView
+        android:id="@+id/hiddenAppsActivityTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="16dp"
+        android:paddingTop="16dp"
+        android:text="Applicazioni nascoste"
+        android:textColor="?attr/colorPrimary"
+        android:textSize="34sp" />
+
+    <TextView
+        android:id="@+id/hiddenAppsActivitySubtitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="16dp"
+        android:paddingBottom="8dp"
+        android:text="Tappa un app per eseguirla\nTieni premuto per smettere di nasconderla" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:layout_marginTop="4dp"
+        android:background="?attr/colorPrimary" />
+    <ListView
+        android:id="@+id/hiddenAppsListView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+</LinearLayout>

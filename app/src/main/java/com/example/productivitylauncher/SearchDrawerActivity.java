@@ -94,6 +94,7 @@ public class SearchDrawerActivity extends AppCompatActivity {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             List<String> dialogChoices = new ArrayList<>();
             dialogChoices.add("Nascondi app");
+            dialogChoices.add("Crea scorciatoia");
             if (!app.isSystemApp){
                 dialogChoices.add("Disinstalla");
             }
@@ -108,6 +109,20 @@ public class SearchDrawerActivity extends AppCompatActivity {
                     }
                     else if(dialogChoices.get(i).equals("Nascondi app")){
                         hideApp(app);
+                    }
+                    else if(dialogChoices.get(i).equals("Crea scorciatoia")){
+                        SharedPreferences sharedPreferences = getSharedPreferences(getResources().getString(R.string.shortcut_apps),Context.MODE_PRIVATE);
+                        if(sharedPreferences.getAll().size()>3){
+                            //TODO show dialog alert
+                        }else{
+                            SharedPreferences.Editor editor = sharedPreferences.edit();
+                            editor.putString((String) app.packageName, (String) app.label).apply();
+                            if (MainActivity.shortcutAppsAdapter != null){
+                                MainActivity.shortcutAppsAdapter.add(app);
+                                MainActivity.shortcutAppsAdapter.notifyDataSetChanged();
+                            }
+                        }
+
                     }
                     Log.d("CLICK", (String) dialogChoicesSequence[i]);
                 }

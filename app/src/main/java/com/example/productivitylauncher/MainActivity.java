@@ -4,7 +4,9 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
 import android.content.ContentUris;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.AlarmClock;
@@ -14,16 +16,26 @@ import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.ProgressBar;
 
 import com.google.android.material.snackbar.Snackbar;
 
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity implements View.OnTouchListener, GestureDetector.OnGestureListener {
     GestureDetector gestureDetector;
     ProgressBar progressBar;
     InfinityBarThread infinityBarThread;
+
+    ListView shortcutAppsListView;
+    static ArrayAdapter<AppInfo> shortcutAppsAdapter;
 
     @SuppressLint("MissingInflatedId")
     @Override
@@ -34,7 +46,35 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
         gestureDetector = new GestureDetector(this,this);
         progressBar = findViewById(R.id.progressBar);
 
-
+        List<AppInfo> shortcutAppsList = new ArrayList();
+        shortcutAppsListView = findViewById(R.id.shortcutAppsListView);
+        SharedPreferences shortcutApps = getSharedPreferences(getResources().getString(R.string.shortcut_apps), Context.MODE_PRIVATE);
+        Iterator hiddenAppsIterator = shortcutApps.getAll().entrySet().iterator();
+        while (hiddenAppsIterator.hasNext()){
+            Map.Entry pair = (Map.Entry)hiddenAppsIterator.next();
+            shortcutAppsList.add(new AppInfo((CharSequence) pair.getValue(), (CharSequence) pair.getKey()));
+        }
+        shortcutAppsAdapter = new ArrayAdapter<AppInfo>(this, R.layout.list_item, R.id.list_content,shortcutAppsList);
+        shortcutAppsListView.setAdapter(shortcutAppsAdapter);
+        shortcutAppsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                AppInfo app = shortcutAppsList.get(i);
+                app.launchApp(getApplicationContext());
+            }
+        });
+        shortcutAppsListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
+                AppInfo app = shortcutAppsList.get(i);
+                SharedPreferences.Editor editor = shortcutApps.edit();
+                editor.remove((String) app.packageName);
+                editor.apply();
+                shortcutAppsAdapter.remove(app);
+                shortcutAppsAdapter.notifyDataSetChanged();
+                return true;
+            }
+        });
     }
     @Override
     protected void onResume() {

@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <item name="WIDGET_ID" type="id" />
+    <item name="APPWIDGET_HOST_ID" type="integer" >10101001</item>
+    <item name="REQUEST_PICK_APPWIDGET" type="integer" >10101002</item>
+    <item name="REQUEST_CREATE_APPWIDGET" type="integer" >10101003</item>
+    <item name="REQUEST_PICK_IMAGE" type="integer" >10101004</item>
+
 </resources>

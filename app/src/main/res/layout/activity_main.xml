@@ -72,6 +72,20 @@
         app:layout_constraintTop_toBottomOf="@+id/linearLayout" />
 
 
+    <LinearLayout
+        android:id="@+id/widgetLinearLayout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp"
+        app:layout_constraintBottom_toTopOf="@+id/shortcutAppsListView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/progressBar"
+        app:layout_constraintVertical_bias="1.0"></LinearLayout>
+
+
     <ListView
         android:id="@+id/shortcutAppsListView"
         android:layout_width="0dp"
@@ -80,11 +94,12 @@
         android:dividerHeight="0dp"
         android:paddingLeft="16dp"
         android:paddingRight="16dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/settingsBtn"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="@+id/view"
-        app:layout_constraintTop_toBottomOf="@+id/progressBar" />
+        app:layout_constraintTop_toBottomOf="@+id/progressBar"
+        app:layout_constraintVertical_bias="0.92" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/settingsBtn"

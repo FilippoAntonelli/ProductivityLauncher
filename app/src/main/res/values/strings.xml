@@ -104,5 +104,7 @@
     <string name="hidden_apps_shared_preferences" translatable="false">productivity_launcher_hidden_apps</string>
     <string name="infinity_bar_time_shared_preferences" translatable="false">productivity_launcher_infinity_bar_time</string>
     <string name="shortcut_apps" translatable="false">productivity_launcher_shortcut_apps</string>
+    <string name="widget_preferences">productivity_launcher_widget_preferences</string>
+    <string name="widget_key">0</string>
 
 </resources>

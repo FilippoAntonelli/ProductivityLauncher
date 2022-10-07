@@ -72,24 +72,26 @@
         app:layout_constraintTop_toBottomOf="@+id/linearLayout" />
 
 
-    <LinearLayout
-        android:id="@+id/widgetLinearLayout"
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/widgetFragment"
+        android:name="com.example.productivitylauncher.WidgetFragment"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:paddingLeft="16dp"
-        android:paddingRight="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
         app:layout_constraintBottom_toTopOf="@+id/shortcutAppsListView"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/progressBar"
-        app:layout_constraintVertical_bias="1.0"></LinearLayout>
+        app:layout_constraintVertical_bias="1.0"
+        tools:layout="@layout/fragment_widget" />
 
 
     <ListView
         android:id="@+id/shortcutAppsListView"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="24dp"
         android:divider="@null"
         android:dividerHeight="0dp"
         android:paddingLeft="16dp"
@@ -99,7 +101,7 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="@+id/view"
         app:layout_constraintTop_toBottomOf="@+id/progressBar"
-        app:layout_constraintVertical_bias="0.92" />
+        app:layout_constraintVertical_bias="1.0" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/settingsBtn"

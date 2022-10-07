@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">ProductivityLauncher</string>
+    <string name="hide_app">Nascondi app</string>
+    <string name="create_shortcut">Crea scorciatoia</string>
+    <string name="uninstall">Disinstalla</string>
+    <string name="widget_space_error_message">Non hai abbastanza spazio per aggiungere questo widget!</string>
+    <string name="make_widget_bigger">Ingrandisci</string>
+    <string name="make_widget_smaller">Rimpicciolisci</string>
+    <string name="move_widget_up">Sposta su</string>
+    <string name="move_widget_down">Sposta giù</string>
+    <string name="delete">Elimina</string>
+    <string name="add_widget">Aggiungi un widget</string>
+    <string name="change_wallpaper">Cambia lo sfondo</string>
+    <string name="hidden_apps">App nascoste</string>
+    <string name="hidden_apps_subtitle">Tocca un\'app per eseguirla \\n Tieni premuto per smettere di nasconderla</string>
+    <string name="your_day">La tua giornata</string>
+    <string name="starts_at">Inizia alle:</string>
+    <string name="ends_at">Finisce alle:</string>
+    <string name="open_settings">Apri le impostazioni</string>
+    <string name="previous">Precedente</string>
+    <string name="next">Successivo</string>
+</resources>

@@ -1,7 +1,6 @@
 package com.example.productivitylauncher;
 
 
-
 import android.annotation.SuppressLint;
 import android.app.ActionBar;
 import android.app.Activity;
@@ -10,6 +9,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.RectF;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -18,6 +18,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.SearchView;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -31,7 +32,7 @@ public class SearchDrawerActivity extends AppCompatActivity {
     View viewBG;
     ListView appList;
     ArrayAdapter<AppInfo> listViewAdapter;
-    ArrayList <AppInfo> installedApps;
+    ArrayList<AppInfo> installedApps;
     SearchView searchBar;
     Activity activity;
     SoftInputAssist softInputAssist;
@@ -47,13 +48,13 @@ public class SearchDrawerActivity extends AppCompatActivity {
         softInputAssist = new SoftInputAssist(this);
 
         //BINDINGS
-        appList=findViewById(android.R.id.list);
-        searchBar =findViewById(R.id.searchView);
-        viewBG =findViewById(R.id.viewBG);
+        appList = findViewById(android.R.id.list);
+        searchBar = findViewById(R.id.searchView);
+        viewBG = findViewById(R.id.viewBG);
 
         //POPULATE LISTVIEW
         installedApps = new ArrayList<>();
-        listViewAdapter = new ArrayAdapter<>(this, R.layout.list_item, R.id.list_content,installedApps);
+        listViewAdapter = new ArrayAdapter<>(this, R.layout.list_item, R.id.list_content, installedApps);
         appList.setAdapter(listViewAdapter);
 
         new AppListScraper(this, appList).execute();
@@ -78,7 +79,7 @@ public class SearchDrawerActivity extends AppCompatActivity {
             @Override
             public boolean onQueryTextChange(String s) {
                 System.out.println(s.isEmpty());
-                if(s.isEmpty())
+                if (s.isEmpty())
                     listViewAdapter.getFilter().filter("qwertyuiopasdfghjkl");
                 else
                     listViewAdapter.getFilter().filter(s);
@@ -93,38 +94,31 @@ public class SearchDrawerActivity extends AppCompatActivity {
             AppInfo app = listViewAdapter.getItem(i);
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             List<String> dialogChoices = new ArrayList<>();
-            dialogChoices.add("Nascondi app");
-            dialogChoices.add("Crea scorciatoia");
-            if (!app.isSystemApp){
-                dialogChoices.add("Disinstalla");
+            dialogChoices.add(getResources().getString(R.string.hide_app));
+            if (MainActivity.availableSpace > 110) {
+                dialogChoices.add(getResources().getString(R.string.create_shortcut));
+            }
+            if (!app.isSystemApp) {
+                dialogChoices.add(getResources().getString(R.string.uninstall));
             }
             CharSequence[] dialogChoicesSequence = dialogChoices.toArray(new CharSequence[dialogChoices.size()]);
 
-            builder.setItems( dialogChoicesSequence, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialogInterface, int i) {
-                    if(dialogChoices.get(i).equals("Disinstalla")){
-                        startActivityForResult(app.getUninstallIntent(), 1);
-                        listViewAdapter.remove(app);
+            builder.setItems(dialogChoicesSequence, (dialogInterface, i1) -> {
+                if (dialogChoices.get(i1).equals(getResources().getString(R.string.uninstall))) {
+                    startActivityForResult(app.getUninstallIntent(), 1);
+                    listViewAdapter.remove(app);
+                } else if (dialogChoices.get(i1).equals(getResources().getString(R.string.hide_app))) {
+                    hideApp(app);
+                } else if (dialogChoices.get(i1).equals(getResources().getString(R.string.create_shortcut))) {
+                    SharedPreferences sharedPreferences = getSharedPreferences(getResources().getString(R.string.shortcut_apps), Context.MODE_PRIVATE);
+                    MainActivity.availableSpace -= 110;
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.putString((String) app.packageName, (String) app.label).apply();
+                    if (MainActivity.shortcutAppsAdapter != null) {
+                        MainActivity.shortcutAppsAdapter.add(app);
+                        MainActivity.shortcutAppsAdapter.notifyDataSetChanged();
                     }
-                    else if(dialogChoices.get(i).equals("Nascondi app")){
-                        hideApp(app);
-                    }
-                    else if(dialogChoices.get(i).equals("Crea scorciatoia")){
-                        SharedPreferences sharedPreferences = getSharedPreferences(getResources().getString(R.string.shortcut_apps),Context.MODE_PRIVATE);
-                        if(sharedPreferences.getAll().size()>3){
-                            //TODO show dialog alert
-                        }else{
-                            SharedPreferences.Editor editor = sharedPreferences.edit();
-                            editor.putString((String) app.packageName, (String) app.label).apply();
-                            if (MainActivity.shortcutAppsAdapter != null){
-                                MainActivity.shortcutAppsAdapter.add(app);
-                                MainActivity.shortcutAppsAdapter.notifyDataSetChanged();
-                            }
-                        }
 
-                    }
-                    Log.d("CLICK", (String) dialogChoicesSequence[i]);
                 }
             });
             AlertDialog dialog = builder.create();
@@ -138,20 +132,23 @@ public class SearchDrawerActivity extends AppCompatActivity {
     }
 
     @Override
-    protected  void onResume() {
+    protected void onResume() {
         softInputAssist.onResume();
         super.onResume();
     }
+
     @Override
     protected void onPause() {
         softInputAssist.onPause();
         super.onPause();
     }
+
     @Override
-    protected void onDestroy(){
+    protected void onDestroy() {
         softInputAssist.onDestroy();
         super.onDestroy();
     }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -162,7 +159,8 @@ public class SearchDrawerActivity extends AppCompatActivity {
             }
         }
     }
-    private void hideApp(AppInfo app){
+
+    private void hideApp(AppInfo app) {
         SharedPreferences.Editor hidden_apps_editor = getSharedPreferences(getResources().getString(R.string.hidden_apps_shared_preferences), Context.MODE_PRIVATE).edit();
         hidden_apps_editor.putString((String) app.packageName, (String) app.label);
         hidden_apps_editor.apply();
@@ -170,9 +168,11 @@ public class SearchDrawerActivity extends AppCompatActivity {
         listViewAdapter.notifyDataSetChanged();
         listViewAdapter.getFilter().filter(searchBar.getQuery());
     }
-    public void onSettingsClick(View view){
+
+    public void onSettingsClick(View view) {
         Intent settingsActivity = new Intent(this, SettingsActivity.class);
         startActivity(settingsActivity);
     }
+
 
 }

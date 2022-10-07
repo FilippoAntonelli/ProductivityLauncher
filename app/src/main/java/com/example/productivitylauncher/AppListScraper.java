@@ -12,9 +12,6 @@ import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-import org.xml.sax.helpers.AttributesImpl;
-
-import java.util.ArrayList;
 import java.util.List;
 
 public class AppListScraper extends AsyncTask<Void,Void,String> {

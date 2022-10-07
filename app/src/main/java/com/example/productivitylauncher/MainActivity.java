@@ -1,17 +1,22 @@
 package com.example.productivitylauncher;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.WallpaperManager;
-import android.appwidget.AppWidgetManager;
-import android.appwidget.AppWidgetProviderInfo;
 import android.content.ContentUris;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.content.res.Configuration;
+import android.graphics.RectF;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -22,16 +27,11 @@ import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 
-import com.example.productivitylauncher.Widget.WidgetHost;
-import com.example.productivitylauncher.Widget.WidgetInfo;
-import com.example.productivitylauncher.Widget.WidgetView;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.gson.Gson;
 
@@ -47,31 +47,29 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
     GestureDetector gestureDetector;
     ProgressBar progressBar;
     InfinityBarThread infinityBarThread;
+    AppInfo defaultCamera;
 
     ListView shortcutAppsListView;
     static ArrayAdapter<AppInfo> shortcutAppsAdapter;
+    static int availableSpace = 0;
 
-    WidgetHost mAppWidgetHost;
-    AppWidgetManager mAppWidgetManager;
-    ViewGroup widgetLinearLayout;
+    WidgetFragment fragment;
+
 
     @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.d("CREATE","CREAte");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         findViewById(R.id.view).setOnTouchListener(this);
         gestureDetector = new GestureDetector(this, this);
         progressBar = findViewById(R.id.progressBar);
-
+        //loadPreferences();
         //--WIDGET STUFF--
-        widgetLinearLayout = findViewById(R.id.widgetLinearLayout);
-        mAppWidgetManager = AppWidgetManager.getInstance(getApplicationContext());
-        mAppWidgetHost = new WidgetHost(getApplicationContext(), R.integer.APPWIDGET_HOST_ID);
-        mAppWidgetHost.startListening();
-        restoreState();
+        fragment = (WidgetFragment) getSupportFragmentManager().findFragmentById(R.id.widgetFragment);
         //--WIDGET STUFF--
-
+        //checkWallpaperContrast();
 
         List<AppInfo> shortcutAppsList = new ArrayList();
         shortcutAppsListView = findViewById(R.id.shortcutAppsListView);
@@ -101,17 +99,15 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
         });
     }
 
+
     @Override
     protected void onStart() {
         super.onStart();
-        mAppWidgetHost.startListening();
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        mAppWidgetHost.stopListening();
-        saveState();
     }
 
     @Override
@@ -130,10 +126,8 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
     @Override
     protected void onDestroy() {
         infinityBarThread.interrupt();
-        mAppWidgetHost.stopListening();
         super.onDestroy();
     }
-
 
     public void onClockClick(View v) {
         Intent clock = new Intent(AlarmClock.ACTION_SHOW_ALARMS);
@@ -162,23 +156,20 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
         }
     }
 
-    public void onCameraClick(View v) {
+    public void setDefaultCamera() {
+        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        PackageManager packageManager = MainActivity.this.getPackageManager();
+        List<ResolveInfo> listCam = packageManager.queryIntentActivities(intent, 0);
+        this.defaultCamera = new AppInfo("",listCam.get(0).activityInfo.packageName);
+    }
 
-        Intent intent = new Intent(MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA);
-        Log.d("TEST", String.valueOf(intent.resolveActivity(getPackageManager())));
-        try {
-            startActivity(getPackageManager().getLaunchIntentForPackage(
-                    intent.resolveActivity(getPackageManager()).getPackageName()));
-        } catch (Exception e) {
-            Snackbar.make(v, "Oups, an error occoured: " + e, Snackbar.LENGTH_SHORT).show();
+    public void onCameraClick(View v) {
+        if(defaultCamera != null){
+            defaultCamera.launchApp(this);
+        }else{
+            setDefaultCamera();
+            defaultCamera.launchApp(this);
         }
-        /*
-        Intent camera = new Intent(MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA);
-        try{
-            startActivity(camera);
-        } catch (Exception e) {
-            Snackbar.make(v,"Oups, an error occoured: "+e, Snackbar.LENGTH_SHORT).show();
-        }*/
     }
 
     @Override
@@ -217,16 +208,19 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
     public void onLongPress(MotionEvent motionEvent) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         List<String> dialogChoices = new ArrayList<>();
-        dialogChoices.add("Aggiungi un widget");
-        dialogChoices.add("Cambia sfondo");
+        dialogChoices.add(getResources().getString(R.string.add_widget));
+        dialogChoices.add(getResources().getString(R.string.change_wallpaper));
+        dialogChoices.add(getResources().getString(R.string.open_settings));
         CharSequence[] dialogChoicesSequence = dialogChoices.toArray(new CharSequence[dialogChoices.size()]);
         builder.setItems(dialogChoicesSequence, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                if (dialogChoices.get(i).equals("Aggiungi un widget")) {
-                    selectWidget();
-                } else if (dialogChoices.get(i).equals("Cambia sfondo")) {
+                if (dialogChoices.get(i).equals(getResources().getString(R.string.add_widget))) {
+                    fragment.selectWidget();
+                } else if (dialogChoices.get(i).equals(getResources().getString(R.string.change_wallpaper))) {
                     pickImage();
+                } else if(dialogChoices.get(i).equals(getResources().getString(R.string.open_settings))){
+                    startActivity(new Intent(getApplicationContext(), SettingsActivity.class));
                 }
             }
         });
@@ -257,208 +251,50 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
     public boolean onFling(MotionEvent motionEvent, MotionEvent motionEvent1, float v, float v1) {
         Log.d("GESTURES", "FLING v:" + v + "  v1:" + v1);
         if (v1 < -500) {
-            Log.d("GESTURES", "OPEN SEARCH MENU");
             Intent searchDrawer = new Intent(this, SearchDrawerActivity.class);
+            availableSpace = getAvailableSpace();
             startActivity(searchDrawer);
             //overridePendingTransition(R.anim.slide_in_bottom,R.anim.slide_out_bottom);
         }
         return false;
     }
 
-    private void saveState() {
-        SharedPreferences widgetPrefs = getSharedPreferences(String.valueOf(R.string.widget_preferences), Context.MODE_PRIVATE);
-        WidgetInfo[] widgetInfos = new WidgetInfo[widgetLinearLayout.getChildCount()];
-        for (int i = 0; i < widgetLinearLayout.getChildCount(); i++) {
-            WidgetView widget = (WidgetView) widgetLinearLayout.getChildAt(i);
-            WidgetInfo info = new WidgetInfo(widget.getAppWidgetId(), widgetLinearLayout.getChildAt(i).getHeight());
-            widgetInfos[i] = info;
-        }
-        //ADD implementation 'com.google.code.gson:gson:2.8.7' to build.gradle
-        String widgetInfosJson = new Gson().toJson(widgetInfos);
-        widgetPrefs.edit().putString(String.valueOf(R.string.widget_key), widgetInfosJson).apply();
-    }
-
-    private void restoreState() {
-        SharedPreferences widgetPrefs = getSharedPreferences(String.valueOf(R.string.widget_preferences), Context.MODE_PRIVATE);
-        String widgetInfosJson = widgetPrefs.getString(String.valueOf(R.string.widget_key), "");
-        if (!widgetInfosJson.equals("")) {
-            WidgetInfo[] widgetInfos = new Gson().fromJson(widgetInfosJson, WidgetInfo[].class);
-            for (WidgetInfo widget : widgetInfos) {
-                loadWidget(widget);
-                System.out.println(widget.toString());
-            }
-        }
-    }
-
-    //Calls the intent for picking a widget
-    void selectWidget() {
-        int appWidgetId = this.mAppWidgetHost.allocateAppWidgetId();
-        Intent pickIntent = new Intent(AppWidgetManager.ACTION_APPWIDGET_PICK);
-        pickIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
-        startActivityForResult(pickIntent, R.integer.REQUEST_PICK_APPWIDGET);
-    }
-
-    private void configureWidget(Intent data) {
-        Bundle extras = data.getExtras();
-        int appWidgetId = extras.getInt(AppWidgetManager.EXTRA_APPWIDGET_ID, -1);
-        AppWidgetProviderInfo appWidgetInfo = mAppWidgetManager.getAppWidgetInfo(appWidgetId);
-        if (appWidgetInfo.configure != null) {
-            Intent intent = new Intent(AppWidgetManager.ACTION_APPWIDGET_CONFIGURE);
-            intent.setComponent(appWidgetInfo.configure);
-            intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
-            startActivityForResult(intent, R.integer.REQUEST_CREATE_APPWIDGET);
-        } else {
-            createWidget(data);
-        }
-    }
-
-    //adding it to you view
-    public void createWidget(Intent data) {
-        Bundle extras = data.getExtras();
-        int appWidgetId = extras.getInt(AppWidgetManager.EXTRA_APPWIDGET_ID, -1);
-        loadWidget(new WidgetInfo(appWidgetId, -1));
-        saveState();
-    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == RESULT_OK) {
-            if (requestCode == R.integer.REQUEST_PICK_APPWIDGET) {
-                configureWidget(data);
-            } else if (requestCode == R.integer.REQUEST_CREATE_APPWIDGET) {
-                createWidget(data);
-            } else if (requestCode == R.integer.REQUEST_PICK_IMAGE) {
+            if (requestCode == R.integer.REQUEST_PICK_IMAGE) {
                 Uri selectedImageUri = data.getData();
                 if (null != selectedImageUri) {
                     setWallpaper(selectedImageUri);
                 }
             }
-        } else if (resultCode == RESULT_CANCELED && data != null) {
-            int appWidgetId = data.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, -1);
-            if (appWidgetId != -1) {
-                mAppWidgetHost.deleteAppWidgetId(appWidgetId);
-            }
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
 
-    //create and load the widget
-    public void loadWidget(WidgetInfo widget) {
-        AppWidgetProviderInfo appWidgetInfo = mAppWidgetManager.getAppWidgetInfo(widget.widgetId);
-        WidgetView hostView = (WidgetView) mAppWidgetHost.createView(getApplicationContext(), widget.widgetId, appWidgetInfo);
-        hostView.setAppWidget(widget.widgetId, appWidgetInfo);
-        widget.height = (widget.height > 0) ? widget.height : Math.max(appWidgetInfo.minResizeHeight, appWidgetInfo.minHeight);
-        setWidgetSize(hostView, widget.height);
+    public int getAvailableSpace() {
 
-        hostView.setLongClickable(true);
-        hostView.setOnLongClickListener(view -> {
-            final WidgetView widgetWithMenuCurrentlyDisplayed = (WidgetView) view;
-            final ViewGroup parent = (ViewGroup) widgetWithMenuCurrentlyDisplayed.getParent();
-            int currentIndex = parent.indexOfChild(widgetWithMenuCurrentlyDisplayed);
-
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            List<String> dialogChoices = new ArrayList<>();
-            if (canBeBigger(widgetWithMenuCurrentlyDisplayed)) {
-                dialogChoices.add("Ingrandisci");
+        View progressBar = findViewById(R.id.progressBar);
+        View shortcutAppsList = findViewById(R.id.shortcutAppsListView);
+        View widgetFragment = findViewById(R.id.widgetFragment);
+        if (progressBar != null && shortcutAppsList != null && widgetFragment != null) {
+            RectF oneRect = calculateRectOnScreen(progressBar);
+            RectF otherRect = calculateRectOnScreen(shortcutAppsList);
+            float space = Math.abs(oneRect.bottom - otherRect.top);
+            if (space == 0) {
+                return Integer.MAX_VALUE;
             }
-            if (canBeSmaller(widgetWithMenuCurrentlyDisplayed)) {
-                dialogChoices.add("Rimpicciolisci");
-            }
-            if (currentIndex > 0) {
-                dialogChoices.add("Sposta su");
-            }
-            if (currentIndex < widgetLinearLayout.getChildCount() - 1) {
-                dialogChoices.add("Sposta giu");
-            }
-            dialogChoices.add("Elimina");
-            CharSequence[] dialogChoicesSequence = dialogChoices.toArray(new CharSequence[dialogChoices.size()]);
+            space = space - widgetFragment.getHeight();
+            return (int) space;
+        } else return -1;
 
-            builder.setItems(dialogChoicesSequence, (dialogInterface, i) -> {
-                if (dialogChoices.get(i).equals("Ingrandisci")) {
-                    makeWidgetBigger(widgetWithMenuCurrentlyDisplayed);
-                } else if (dialogChoices.get(i).equals("Rimpicciolisci")) {
-                    makeWidgetSmaller(widgetWithMenuCurrentlyDisplayed);
-                } else if (dialogChoices.get(i).equals("Sposta su")) {
-                    moveWidgetUp(widgetWithMenuCurrentlyDisplayed, parent);
-                } else if (dialogChoices.get(i).equals("Sposta giu")) {
-                    moveWidgetDown(widgetWithMenuCurrentlyDisplayed, parent);
-                } else if (dialogChoices.get(i).equals("Elimina")) {
-                    removeWidget(widgetWithMenuCurrentlyDisplayed);
-                }
-                Log.d("CLICK", (String) dialogChoicesSequence[i]);
-            });
-            AlertDialog dialog = builder.create();
-            dialog.show();
-            return true;
-        });
-        widgetLinearLayout.addView(hostView);
     }
 
-    public void removeWidget(WidgetView hostView) {
-        mAppWidgetHost.deleteAppWidgetId(hostView.getAppWidgetId());
-        widgetLinearLayout.removeView(hostView);
-        saveState();
-    }
-
-
-    private void setWidgetSize(WidgetView hostView, int height) {
-        AppWidgetProviderInfo appWidgetInfo = mAppWidgetManager.getAppWidgetInfo(hostView.getAppWidgetId());
-        hostView.setMinimumHeight(height);
-        hostView.setMinimumWidth(Math.min(appWidgetInfo.minWidth, appWidgetInfo.minResizeWidth));
-        ViewGroup.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, height);
-        hostView.setLayoutParams(params);
-    }
-
-    private boolean canBeBigger(WidgetView widgetView) {
-        AppWidgetProviderInfo widgetInfo = mAppWidgetManager.getAppWidgetInfo(widgetView.getAppWidgetId());
-        int height = widgetView.getHeight();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            if (height < 0 || widgetInfo == null || height + 50 >= widgetInfo.maxResizeHeight) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private boolean canBeSmaller(WidgetView widgetView) {
-        AppWidgetProviderInfo widgetInfo = mAppWidgetManager.getAppWidgetInfo(widgetView.getAppWidgetId());
-        int height = widgetView.getHeight();
-        if (height < 0 || widgetInfo == null || height - 50 < Math.min(widgetInfo.minHeight, widgetInfo.minResizeHeight)) {
-            return false;
-        }
-        return true;
-    }
-
-    private void makeWidgetBigger(WidgetView widgetView) {
-        if (canBeBigger(widgetView)) {
-            setWidgetSize(widgetView, widgetView.getHeight() + 50);
-        }
-        saveState();
-    }
-
-    private void makeWidgetSmaller(WidgetView widgetView) {
-        if (canBeSmaller(widgetView)) {
-            setWidgetSize(widgetView, widgetView.getHeight() - 50);
-        }
-        saveState();
-    }
-
-    private void moveWidgetUp(WidgetView widgetView, ViewGroup group) {
-        int currentIndex = group.indexOfChild(widgetView);
-        if (currentIndex > 0) {
-            group.removeViewAt(currentIndex);
-            group.addView(widgetView, currentIndex - 1);
-            saveState();
-        }
-    }
-
-    private void moveWidgetDown(WidgetView widgetView, ViewGroup group) {
-        int currentIndex = group.indexOfChild(widgetView);
-        if (currentIndex < widgetLinearLayout.getChildCount() - 1) {
-            group.removeViewAt(currentIndex);
-            group.addView(widgetView, currentIndex + 1);
-            saveState();
-        }
+    public static RectF calculateRectOnScreen(View view) {
+        int[] location = new int[2];
+        view.getLocationOnScreen(location);
+        return new RectF(location[0], location[1], location[0] + view.getMeasuredWidth(), location[1] + view.getMeasuredHeight());
     }
 
 

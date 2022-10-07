@@ -13,7 +13,7 @@
         android:layout_height="wrap_content"
         android:paddingLeft="16dp"
         android:paddingTop="16dp"
-        android:text="Applicazioni nascoste"
+        android:text="@string/hidden_apps"
         android:textColor="?attr/colorPrimary"
         android:textSize="34sp" />
 
@@ -23,7 +23,7 @@
         android:layout_height="wrap_content"
         android:paddingLeft="16dp"
         android:paddingBottom="8dp"
-        android:text="Tappa un app per eseguirla\nTieni premuto per smettere di nasconderla" />
+        android:text="@string/hidden_apps_subtitle"/>
 
     <View
         android:layout_width="match_parent"

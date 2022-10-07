@@ -5,4 +5,11 @@
     <item name="REQUEST_CREATE_APPWIDGET" type="integer" >10101003</item>
     <item name="REQUEST_PICK_IMAGE" type="integer" >10101004</item>
 
+    <string name="hidden_apps_shared_preferences" translatable="false">productivity_launcher_hidden_apps</string>
+    <string name="infinity_bar_time_shared_preferences" translatable="false">productivity_launcher_infinity_bar_time</string>
+    <string name="shortcut_apps" translatable="false">productivity_launcher_shortcut_apps</string>
+    <string name="launcher_preferences" translatable="false">productivity_launcher_shared_preferences</string>
+    <string name="widget_preferences" translatable="false">productivity_launcher_widget_preferences</string>
+    <string name="widget_key" translatable="false">0</string>
+
 </resources>

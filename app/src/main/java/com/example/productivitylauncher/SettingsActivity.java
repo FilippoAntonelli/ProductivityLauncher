@@ -20,19 +20,19 @@ public class SettingsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_settings);
         settingsList = findViewById(R.id.settingsList);
         ArrayList<String> settings = new ArrayList<>();
-        settings.add("App nascoste");
-        settings.add("Infinity bar");
+        settings.add(getResources().getString(R.string.hidden_apps));
+        settings.add(getResources().getString(R.string.infinity_bar));
         settingsAdapter = new ArrayAdapter<String>(this, R.layout.list_item, R.id.list_content,settings);
         //settingsAdapter= new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1,settings);
         settingsList.setAdapter(settingsAdapter);
         settingsList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                if (settingsList.getItemAtPosition(i).equals("App nascoste")){
+                if (settingsList.getItemAtPosition(i).equals(getResources().getString(R.string.hidden_apps))){
                     Intent hiddenAppsActivity = new Intent(getApplicationContext(), HiddenAppsActivity.class);
                     startActivity(hiddenAppsActivity);
                 }
-                if (settingsList.getItemAtPosition(i).equals("Infinity bar")){
+                if (settingsList.getItemAtPosition(i).equals(getResources().getString(R.string.infinity_bar))){
                     Intent infinityBarActivity = new Intent(getApplicationContext(), InfinityBarSettingsActivity.class);
                     startActivity(infinityBarActivity);
                 }

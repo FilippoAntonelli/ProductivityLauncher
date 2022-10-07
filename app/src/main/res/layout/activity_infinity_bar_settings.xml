@@ -30,7 +30,7 @@
         android:paddingLeft="16dp"
         android:paddingTop="16dp"
         android:paddingBottom="16dp"
-        android:text="La tua giornata"
+        android:text="@string/your_day"
         android:textAlignment="textStart"
         android:textColor="?attr/colorPrimary"
         android:textSize="24sp" />
@@ -82,7 +82,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="inizia alle:"
+            android:text="@string/starts_at"
             android:textAlignment="center"
             android:textColor="?attr/colorPrimary"
             android:textSize="14sp" />
@@ -92,7 +92,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="finisce alle:"
+            android:text="@string/ends_at"
             android:textAlignment="center"
             android:textColor="?attr/colorPrimary"
             android:textSize="14sp" />
